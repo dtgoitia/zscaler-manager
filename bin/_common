@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+LOCAL_BIN_DIR="${HOME}/.local/bin"
+
+vpn_cli_name="vpn"
+vpn_cli_installation_path="${LOCAL_BIN_DIR}/${vpn_cli_name}"
+
+daemon_name="zscaler-guardian-daemon"
+daemon_installation_path="${LOCAL_BIN_DIR}/${daemon_name}"
+
+systemd_service="${daemon_name}.service"
+systemd_units_path="${HOME}/.config/systemd/user"
+
+
+log () {
+    echo >&2 "${1}"
+}
+
+info () {
+    log "$( date --rfc-3339='seconds' ) [INFO] ${1}"
+}

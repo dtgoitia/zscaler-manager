@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+
+source bin/_common
+
+
+function uninstall_vpn_cli () {
+    info "uninstalling vpn CLI at ${vpn_cli_installation_path}"
+    rm -rf "${vpn_cli_installation_path}"
+}
+
+
+function uninstall_guardian_daemon_bin () {
+    info "uninstalling daemon at ${daemon_installation_path}"
+    rm -rf "${daemon_installation_path}"
+}
+
+
+function uninstall_guardian_daemon_systemd_service () {
+    info "disabling the daemon systemd service"
+    systemctl --user stop "${systemd_service}" || info "service alredy stopped"
+    systemctl --user disable "${systemd_service}" || info "service alredy stopped"
+
+    service_unit_path="${systemd_units_path}/${systemd_service}"
+
+    info "deleting service unit file at ${service_unit_path}"
+    rm -rf "${service_unit_path}"
+
+    info "making systemd aware of the deleted service"
+    systemctl --user daemon-reload
+}
+
+uninstall_vpn_cli
+uninstall_guardian_daemon_bin
+uninstall_guardian_daemon_systemd_service
+info 'uninstallation ended without errors'

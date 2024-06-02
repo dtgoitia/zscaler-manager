@@ -1,0 +1,9 @@
+[Unit]
+Description=start the zscaler-guardian daemon
+
+[Service]
+ExecStart=__EXECUTABLE_PATH__
+Restart=always
+
+[Install]
+WantedBy=default.target

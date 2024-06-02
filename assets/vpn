@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Convenient - and hacky - way of only being asked once for the root password.
+# Otherwise, the Python CLI would ask the root password multiple times. Bear
+# in mind that the Python CLI can take a `--verbose` flag before as the first
+# argument:
+#   python -m src.cli.vpn {up,down}
+#   python -m src.cli.vpn --verbose {up,down}
+if [[
+    "$1" == "up"   ||
+    "$1" == "down" ||
+    "$2" == "up"   ||
+    "$2" == "down"  
+]]; then
+    sudo echo -n ""
+fi
+
+cd "${HOME}/projects/zscaler-guardian"
+python -m src.cli.vpn $@

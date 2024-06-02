@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+
+source bin/_common
+
+ASSETS_DIR=assets
+
+
+function install_vpn_cli () {
+    asset_path="${ASSETS_DIR}/vpn"
+    installation_path="${vpn_cli_installation_path}"
+
+    info "installing vpn CLI at ${installation_path}"
+    cp "${asset_path}" "${installation_path}"
+}
+
+
+function install_guardian_daemon_bin () {
+    asset_path="${ASSETS_DIR}/zscaler-guardian-daemon"
+
+    info "installing daemon at ${daemon_installation_path}"
+    cp "${asset_path}" "${daemon_installation_path}"
+
+    info "configuring HOME path (${HOME}) in daemon"
+    # replace home user
+    query='s/'
+    query+='\${HOME}'
+    query+='/'
+    query+="\/home\/${USER}"
+    query+='/g'
+    sed -i "${query}" "${daemon_installation_path}"
+}
+
+
+function install_guardian_daemon_systemd_service () {
+    service_unit_path="${systemd_units_path}/${systemd_service}"
+
+    info "creating service unit file at ${service_unit_path}"
+    cp "${ASSETS_DIR}/systemd/${systemd_service}" "${service_unit_path}"
+
+    info "replace executable path (${daemon_installation_path}) in service unit file"
+    query='s/'
+    query+='__EXECUTABLE_PATH__'
+    query+='/'
+    query+="$( echo "${daemon_installation_path}" | sed 's/\//\\\//g' `# escape backslashes` )"
+    query+='/g'
+    sed -i "${query}" "${service_unit_path}"
+
+    info "making systemd aware of the new service"
+    systemctl --user daemon-reload
+
+    info "enabling the daemon systemd service"
+    systemctl --user start "${systemd_service}"
+    systemctl --user enable "${systemd_service}"
+}
+
+
+install_vpn_cli
+install_guardian_daemon_bin
+install_guardian_daemon_systemd_service
+info 'installation ended without errors'
